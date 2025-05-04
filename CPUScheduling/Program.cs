@@ -17,7 +17,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// Ensure static files are properly served before MapStaticAssets
 app.UseStaticFiles();
 app.MapStaticAssets();
 
