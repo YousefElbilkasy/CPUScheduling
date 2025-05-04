@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<!-- Force dark mode by adding the 'dark' class directly to the html element -->
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - CPU Scheduling</title>
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+</head>
+
+<body class="bg-gray-900 min-h-screen">
+  <header>
+    <nav class="bg-gray-800 shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <a class="text-xl font-semibold text-white" asp-area="" asp-controller="Home" asp-action="Index">CPU
+            Scheduling</a>
+          <div class="flex items-center space-x-4">
+            <a class="text-gray-300 hover:text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <div class="container mx-auto px-4 py-6">
+    <main role="main">
+      @RenderBody()
+    </main>
+  </div>
+
+  <footer class="border-t border-gray-700 mt-12 py-4 bg-gray-800">
+    <div class="container mx-auto px-4">
+      <div class="text-center text-gray-400">
+        &copy; @DateTime.Now.Year - CPU Scheduling Algorithms Simulator
+      </div>
+    </div>
+  </footer>
+  <script src="~/js/site.js" asp-append-version="true"></script>
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

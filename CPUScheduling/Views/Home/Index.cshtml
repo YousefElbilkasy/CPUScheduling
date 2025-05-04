@@ -1,0 +1,296 @@
+﻿@model SchedulingViewModel
+@{
+  ViewData["Title"] = "CPU Scheduling";
+}
+
+<div class="container mx-auto">
+  <h1 class="text-3xl font-bold text-center my-6 text-gray-900 dark:text-white">CPU Scheduling Algorithms Simulator
+  </h1>
+
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden mb-6">
+    <div class="bg-primary text-white px-4 py-3">
+      <h5 class="font-semibold">Input Data</h5>
+    </div>
+    <div class="p-4">
+      <form asp-action="RunScheduler" method="post">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Scheduling
+              Algorithm:</label>
+            <select asp-for="SelectedAlgorithm" id="algorithmSelect"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="0">First Come First Served (FCFS)</option>
+              <option value="1">Shortest Job First (SJF)</option>
+              <option value="2">Shortest Remaining Time (SRT)</option>
+              <option value="3">Priority Scheduling</option>
+              <option value="4">Round Robin</option>
+            </select>
+          </div>
+          <div id="timeQuantumContainer">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Quantum (for
+              Round Robin):</label>
+            <input asp-for="TimeQuantum"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="number" min="1" value="2" />
+          </div>
+        </div>
+
+        <h5 class="font-semibold mb-3 text-gray-900 dark:text-white">Process Information</h5>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="processTable">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Process ID</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Arrival Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Burst Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300 priority-column">
+                  Priority</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              @for (var i = 0; i < Model.Processes.Count; i++)
+              {
+                <tr>
+                  <td class="px-4 py-2">
+                    <input type="hidden" asp-for="Processes[i].Id" value="@(i + 1)" />
+                    <input type="number" asp-for="Processes[i].ProcessId"
+                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      min="1" />
+                  </td>
+                  <td class="px-4 py-2">
+                    <input type="number" asp-for="Processes[i].ArrivalTime"
+                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      min="0" />
+                  </td>
+                  <td class="px-4 py-2">
+                    <input type="number" asp-for="Processes[i].BurstTime"
+                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      min="1" />
+                  </td>
+                  <td class="px-4 py-2 priority-column">
+                    <input type="number" asp-for="Processes[i].Priority"
+                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 priority-input"
+                      min="1" />
+                  </td>
+                  <td class="px-4 py-2">
+                    <button type="button"
+                      class="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded text-sm delete-row">Delete</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4">
+          <button type="button" id="addProcess" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Add
+            Process</button>
+        </div>
+
+        <div class="mt-6">
+          <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Run
+            Simulation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (Model.Result != null)
+  {
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden mb-6">
+      <div class="bg-success text-white px-4 py-3">
+        <h5 class="font-semibold">Simulation Results</h5>
+      </div>
+      <div class="p-4">
+        <h5 class="font-semibold mb-2 text-gray-900 dark:text-white">Gantt Chart</h5>
+        <div class="gantt-chart mb-6">
+          <div class="flex">
+            @foreach (var item in Model.Result.GanttChart)
+            {
+              var width = (item.EndTime - item.StartTime) * 30;
+              var processText = item.ProcessId == -1 ? "Idle" : $"P{item.ProcessId}";
+              var color = item.ProcessId == -1 ? "bg-gray-400 dark:bg-gray-600" : "bg-blue-500";
+
+              <div class="gantt-item @color text-white" style="min-width: @(width)px; max-width: @(width)px;">
+                <div class="process-id">@processText</div>
+                <div class="process-time">@item.StartTime - @item.EndTime</div>
+              </div>
+            }
+          </div>
+          <div class="flex">
+            @foreach (var item in Model.Result.GanttChart)
+            {
+              var width = (item.EndTime - item.StartTime) * 30;
+              <div class="time-marker" style="min-width: @(width)px; max-width: @(width)px;">
+                <span class="text-gray-900 dark:text-gray-300">@item.StartTime</span>
+              </div>
+            }
+            <div class="time-marker"><span
+                class="text-gray-900 dark:text-gray-300">@Model.Result.GanttChart.Last().EndTime</span>
+            </div>
+          </div>
+        </div>
+
+        <h5 class="font-semibold mb-2 text-gray-900 dark:text-white">Process Details</h5>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Process
+                  ID</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Arrival
+                  Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Burst
+                  Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Completion Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Turnaround Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Waiting
+                  Time</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Response Time</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              @foreach (var process in Model.Result.Processes)
+              {
+                <tr>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">P@(process.ProcessId)</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.ArrivalTime</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.BurstTime</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.CompletionTime</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.TurnaroundTime</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.WaitingTime</td>
+                  <td class="px-4 py-2 text-gray-900 dark:text-gray-300">@process.ResponseTime</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <h5 class="font-semibold mt-6 mb-3 text-gray-900 dark:text-white">Performance Metrics</h5>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-gray-700 p-4 border dark:border-gray-600 rounded shadow">
+            <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Average Waiting Time</h6>
+            <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">
+              @Model.Result.AverageWaitingTime.ToString("F2")</p>
+          </div>
+          <div class="bg-white dark:bg-gray-700 p-4 border dark:border-gray-600 rounded shadow">
+            <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Average Turnaround Time</h6>
+            <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">
+              @Model.Result.AverageTurnaroundTime.ToString("F2")</p>
+          </div>
+          <div class="bg-white dark:bg-gray-700 p-4 border dark:border-gray-600 rounded shadow">
+            <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Average Response Time</h6>
+            <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">
+              @Model.Result.AverageResponseTime.ToString("F2")</p>
+          </div>
+          <div class="bg-white dark:bg-gray-700 p-4 border dark:border-gray-600 rounded shadow">
+            <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-300">CPU Utilization</h6>
+            <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">
+              @Model.Result.CpuUtilization.ToString("F2")%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@section Scripts {
+  <script>
+    $(document).ready(function () {
+      // Show/hide time quantum based on selected algorithm
+      function updateUIBasedOnAlgorithm() {
+        var algorithm = $("#algorithmSelect").val();
+
+        // Show/hide time quantum based on algorithm
+        if (algorithm == "4") { // Round Robin
+          $("#timeQuantumContainer").show();
+        } else {
+          $("#timeQuantumContainer").hide();
+        }
+
+        // Show/hide priority column based on algorithm
+        if (algorithm == "3") { // Priority Scheduling
+          $(".priority-column").show();
+          $(".priority-input").prop('disabled', false);
+        } else {
+          $(".priority-column").hide();
+          // Disable but don't remove priority inputs for non-priority algorithms
+          $(".priority-input").prop('disabled', true).val(1);
+        }
+      }
+
+      // Initial visibility
+      updateUIBasedOnAlgorithm();
+
+      // Update on algorithm change
+      $("#algorithmSelect").change(updateUIBasedOnAlgorithm);
+
+      // Add process button click handler
+      $("#addProcess").click(function () {
+        var rowCount = $("#processTable tbody tr").length;
+        var algorithm = $("#algorithmSelect").val();
+        var priorityColumnStyle = algorithm == "3" ? "" : "style='display: none;'";
+        var priorityDisabled = algorithm != "3" ? "disabled" : "";
+        var darkModeClasses = document.documentElement.classList.contains('dark') ?
+          "dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" : "";
+
+        var newRow = `
+                              <tr>
+                                  <td class="px-4 py-2">
+                                      <input type="hidden" name="Processes[${rowCount}].Id" value="${rowCount + 1}" />
+                                      <input type="number" name="Processes[${rowCount}].ProcessId" class="w-full border border-gray-300 ${darkModeClasses} rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" min="1" value="${rowCount + 1}" />
+                                  </td>
+                                  <td class="px-4 py-2">
+                                      <input type="number" name="Processes[${rowCount}].ArrivalTime" class="w-full border border-gray-300 ${darkModeClasses} rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" min="0" value="0" />
+                                  </td>
+                                  <td class="px-4 py-2">
+                                      <input type="number" name="Processes[${rowCount}].BurstTime" class="w-full border border-gray-300 ${darkModeClasses} rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" min="1" value="5" />
+                                  </td>
+                                  <td class="px-4 py-2 priority-column" ${priorityColumnStyle}>
+                                      <input type="number" name="Processes[${rowCount}].Priority" class="w-full border border-gray-300 ${darkModeClasses} rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 priority-input" min="1" value="1" ${priorityDisabled} />
+                                  </td>
+                                  <td class="px-4 py-2">
+                                      <button type="button" class="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded text-sm delete-row">Delete</button>
+                                  </td>
+                              </tr>
+                          `;
+        $("#processTable tbody").append(newRow);
+      });
+
+      // Delete process row
+      $(document).on("click", ".delete-row", function () {
+        if ($("#processTable tbody tr").length > 1) {
+          $(this).closest("tr").remove();
+
+          // Reindex the input field names
+          $("#processTable tbody tr").each(function (index) {
+            $(this).find("input").each(function () {
+              var name = $(this).attr("name");
+              if (name) {
+                var newName = name.replace(/\[\d+\]/, `[${index}]`);
+                $(this).attr("name", newName);
+              }
+            });
+          });
+        } else {
+          alert("At least one process is required.");
+        }
+      });
+    });
+  </script>
+
+  <style>
+    /* Add some CSS to handle table column transitions */
+    .priority-column {
+      transition: all 0.3s ease;
+    }
+  </style>
+}

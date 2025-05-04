@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Custom Gantt Chart Styles */
+  .gantt-chart {
+    @apply my-5 overflow-x-auto;
+  }
+
+  .gantt-item {
+    @apply border border-white p-2 text-center min-h-[50px] flex flex-col justify-center;
+  }
+
+  .time-marker {
+    @apply text-left py-1 relative;
+  }
+
+  .time-marker span {
+    @apply relative -top-1;
+  }
+
+  .process-id {
+    @apply font-bold;
+  }
+
+  .process-time {
+    @apply text-sm;
+  }
+
+  /* Enhanced Theme Switch Animation */
+  .theme-switch-wrapper {
+    @apply flex items-center;
+  }
+
+  .theme-switch {
+    @apply relative inline-block w-10 h-6 transition-colors duration-200 ease-in-out rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .theme-switch:after {
+    @apply absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transform transition-transform duration-200 ease-in-out shadow-md;
+    content: "";
+  }
+
+  .theme-switch:checked {
+    @apply bg-blue-600;
+  }
+
+  .theme-switch:checked:after {
+    @apply transform translate-x-4;
+  }
+
+  /* Animation for theme transitions */
+  html.transitioning * {
+    @apply transition-colors duration-300;
+  }
+}
