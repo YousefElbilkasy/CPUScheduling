@@ -47,8 +47,8 @@ This application simulates common CPU scheduling algorithms used in operating sy
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YousefElbilkasy/CpuScheduling.git
-   cd CpuScheduling
+   git clone https://github.com/YousefElbilkasy/CPUScheduling.git
+   cd CPUScheduling
    ```
 
 2. Install Node.js dependencies:
