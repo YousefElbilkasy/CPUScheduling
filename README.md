@@ -124,7 +124,11 @@ CPUScheduling/
 ├── Models/               # Data models
 │   ├── Process.cs        # Process entity with timing attributes
 │   ├── GanttChartItem.cs # Represents execution blocks in the Gantt chart
-│   └── ...               # Other model classes
+│   ├── SchedulingAlgorithm.cs # Enum defining available algorithms
+│   └── SchedulingResult.cs # Container for simulation results
+├── ViewModels/           # Presentation models
+│   ├── ErrorViewModel.cs # Error handling data model
+│   └── SchedulingViewModel.cs # Main view data container
 ├── Services/             # Business logic
 │   └── SchedulingService.cs # Implementation of scheduling algorithms
 ├── Views/                # Razor views
