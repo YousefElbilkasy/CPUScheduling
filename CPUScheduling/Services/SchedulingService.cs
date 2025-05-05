@@ -4,6 +4,13 @@ namespace CPUScheduling.Services;
 
 public class SchedulingService
 {
+  /// <summary>
+  /// Schedules processes using the specified algorithm and returns scheduling metrics
+  /// </summary>
+  /// <param name="processes">List of processes to schedule</param>
+  /// <param name="algorithm">The scheduling algorithm to use</param>
+  /// <param name="timeQuantum">Time quantum for Round Robin (ignored for other algorithms)</param>
+  /// <returns>Scheduling result with performance metrics</returns>
   public SchedulingResult Schedule(List<Process> processes, SchedulingAlgorithm algorithm, int timeQuantum = 0)
   {
     // Create a copy of the processes to avoid modifying the original
@@ -47,6 +54,23 @@ public class SchedulingService
     return result;
   }
 
+  /// <summary>
+  /// First-Come, First-Served (FCFS) Scheduling Algorithm
+  ///
+  /// Description: Processes are executed in the order they arrive.
+  /// - Non-preemptive algorithm
+  /// - Simple implementation
+  /// - May suffer from convoy effect (short processes wait behind long ones)
+  ///
+  /// Advantages:
+  /// - Easy to implement and understand
+  /// - Fair in terms of arrival order
+  ///
+  /// Disadvantages:
+  /// - Can lead to poor performance if processes with long burst times arrive first
+  /// - Not suitable for interactive systems due to potentially long waiting times
+  /// - Average waiting time can be high
+  /// </summary>
   private SchedulingResult FCFS(List<Process> processes)
   {
     var result = new SchedulingResult();
@@ -101,6 +125,23 @@ public class SchedulingService
     return result;
   }
 
+  /// <summary>
+  /// Shortest Job First (SJF) Scheduling Algorithm
+  ///
+  /// Description: Selects the process with the smallest burst time from available processes.
+  /// - Non-preemptive algorithm
+  /// - Optimal for minimizing average waiting time when all processes arrive simultaneously
+  ///
+  /// Advantages:
+  /// - Better average waiting time compared to FCFS
+  /// - Minimizes average waiting time when all processes are available at the same time
+  /// - Good for batch systems where process times are known in advance
+  ///
+  /// Disadvantages:
+  /// - Starvation possible for longer processes if shorter processes keep arriving
+  /// - Requires knowledge of burst time in advance
+  /// - Not suitable for interactive systems
+  /// </summary>
   private SchedulingResult SJF(List<Process> processes)
   {
     var result = new SchedulingResult();
@@ -175,6 +216,25 @@ public class SchedulingService
     return result;
   }
 
+  /// <summary>
+  /// Shortest Remaining Time (SRT) Scheduling Algorithm
+  ///
+  /// Description: The preemptive version of SJF. At any point, the process with the smallest remaining time is selected.
+  /// - Preemptive algorithm
+  /// - Context switching occurs when a new process arrives with smaller remaining time
+  /// - Minimizes average waiting time among all scheduling algorithms
+  ///
+  /// Advantages:
+  /// - Typically results in lowest average waiting time
+  /// - Responsive to short processes
+  /// - Better for interactive systems than SJF
+  ///
+  /// Disadvantages:
+  /// - Overhead due to frequent context switching
+  /// - Requires continuous monitoring of remaining times
+  /// - Starvation for longer processes is still possible
+  /// - Requires advance knowledge of burst time
+  /// </summary>
   private SchedulingResult SRT(List<Process> processes)
   {
     var result = new SchedulingResult();
@@ -331,6 +391,23 @@ public class SchedulingService
     return result;
   }
 
+  /// <summary>
+  /// Priority Scheduling Algorithm
+  ///
+  /// Description: Processes are scheduled based on priority values. Lower priority number indicates higher priority.
+  /// - Non-preemptive algorithm in this implementation
+  /// - Processes are selected based on highest priority from available processes
+  ///
+  /// Advantages:
+  /// - Allows important processes to be executed first
+  /// - Good for systems where task importance varies significantly
+  /// - Can be used to meet specific system requirements
+  ///
+  /// Disadvantages:
+  /// - Can lead to starvation of low-priority processes
+  /// - Requires external mechanism to assign priorities
+  /// - Potential for priority inversion if not managed properly
+  /// </summary>
   private SchedulingResult PriorityScheduling(List<Process> processes)
   {
     var result = new SchedulingResult();
@@ -405,6 +482,26 @@ public class SchedulingService
     return result;
   }
 
+  /// <summary>
+  /// Round Robin (RR) Scheduling Algorithm
+  ///
+  /// Description: Each process is assigned a fixed time slice called a quantum.
+  /// - Preemptive algorithm
+  /// - Processes are executed in a circular queue for a fixed time quantum
+  /// - If a process doesn't complete within its time slice, it's moved to the back of the queue
+  ///
+  /// Advantages:
+  /// - Fair allocation of CPU time to all processes
+  /// - Good for time-sharing systems
+  /// - Reduces starvation
+  /// - Good response time for short processes
+  ///
+  /// Disadvantages:
+  /// - Higher average waiting time than SJF
+  /// - Performance heavily depends on the time quantum selection
+  /// - Too small quantum leads to excessive context switching overhead
+  /// - Too large quantum degrades to FCFS behavior
+  /// </summary>
   private SchedulingResult RoundRobin(List<Process> processes, int timeQuantum)
   {
     if (timeQuantum <= 0)
